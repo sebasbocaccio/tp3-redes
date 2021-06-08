@@ -8,7 +8,7 @@ ports_udp = [1,5,7,9,11,13,17,18,19,21,22,37,39,42,49,50,53,67,68,69,82,88,105,1
 ip_experimento = sys.argv[1]
 
 
-def TCPScanner(port,ip):
+def TCPScanner(port,ip,csv):
     abiertos_tcp = 0
     filtrados_tcp = 0
     cerrados_tcp = 0
@@ -33,12 +33,14 @@ def TCPScanner(port,ip):
                 #print(" cerrado", tcp_layer.flags)
                 cerrados_tcp += 1
     print("TCP : filtrados = %i, abiertos = %i, cerrados = %i" % (filtrados_tcp, abiertos_tcp, cerrados_tcp))
+    resultados = ['tcp',abiertos_tcp,cerrados_tcp,filtrados_tcp]
+    csv.writerow(resultados)
     print("Los puertos abiertos son", portsAbiertos)
 
     
 
 
-def UDPScanner(port,ip):
+def UDPScanner(port,ip,csv):
     abiertos_udp = 0
     filtrados_udp = 0
     cerrados_udp = 0
@@ -57,8 +59,12 @@ def UDPScanner(port,ip):
             elif (int(resp.getlayer(ICMP).type) == 3 and int(resp.getlayer(ICMP).code) in [1, 2, 9, 10, 13]):
                 filtrados_udp+=1
     print("UDP : filtrados = %i, abiertos = %i, cerrados = %i" % (filtrados_udp, abiertos_udp, cerrados_udp))
+    resultados = ['udp',abiertos_udp,cerrados_udp,filtrados_udp]
+    csv.writerow(resultados)
     print("Los puertos abiertos son", portsAbiertos)
 
-UDPScanner(ports_udp,ip_experimento)
-TCPScanner(ports_tcp,ip_experimento)
-
+scannedfile = open('scanned-responses-' + ip_experimento + '.csv', 'a')
+writer = csv.writer(scannedfile)
+writer.writerow(['protocolo','abierto','cerrado','protegido'])
+UDPScanner(ports_udp,ip_experimento,writer)
+TCPScanner(ports_tcp,ip_experimento,writer)
